@@ -1,24 +1,25 @@
-import { NextPage } from "next";
-import useAxios from "../hooks/use-axios";
-import { Ranking, TimeControl } from "../types";
 import {
-  TableContainer,
   Paper,
+  Stack,
   Table,
+  TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableBody,
-  Stack,
-  ToggleButtonGroup,
   ToggleButton,
-} from "@mui/material";
-import { useState } from "react";
+  ToggleButtonGroup,
+} from '@mui/material';
+import { NextPage } from 'next';
+import { useState } from 'react';
+import Navbar from '../components/Navbar';
+import useAxios from '../hooks/use-axios';
+import { Ranking, TimeControl } from '../types';
 
 const RankingTable: React.FC<{ timeControl: TimeControl }> = ({
-  timeControl = "classical",
+  timeControl = 'classical',
 }) => {
-  const url: string = `/api?timecontrol=${timeControl}`;
+  const url: string = `/api/2700?timecontrol=${timeControl}`;
   const { loading, data, error } = useAxios<{ rankings: Ranking[] }>(url);
 
   if (loading) {
@@ -38,12 +39,12 @@ const RankingTable: React.FC<{ timeControl: TimeControl }> = ({
   }
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden" }}>
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 430 }}>
         <Table stickyHeader sx={{ minWidth: 430 }} aria-label="2700chess">
           <TableHead>
             <TableRow>
-              <TableCell align="center" scope="row" sx={{ width: "64px" }}>
+              <TableCell align="center" scope="row" sx={{ width: '64px' }}>
                 <b>Rank</b>
               </TableCell>
               <TableCell className="font-semibold">
@@ -63,10 +64,10 @@ const RankingTable: React.FC<{ timeControl: TimeControl }> = ({
                 <TableRow
                   key={ranking.rank}
                   sx={{
-                    "&:last-child td, &:last-child th": { border: 0 },
+                    '&:last-child td, &:last-child th': { border: 0 },
                   }}
                 >
-                  <TableCell align="center" scope="row" sx={{ width: "64px" }}>
+                  <TableCell align="center" scope="row" sx={{ width: '64px' }}>
                     {ranking.rank}
                   </TableCell>
                   <TableCell>{ranking.name}</TableCell>
@@ -85,7 +86,7 @@ const RankingTable: React.FC<{ timeControl: TimeControl }> = ({
 };
 
 const HomePage: NextPage = () => {
-  const [timeControl, setTimeControl] = useState<TimeControl>("classical");
+  const [timeControl, setTimeControl] = useState<TimeControl>('classical');
 
   const changeTimeControl = (
     _event: React.MouseEvent<HTMLElement>,
@@ -97,11 +98,7 @@ const HomePage: NextPage = () => {
 
   return (
     <>
-      <nav className="border-b shadow">
-        <div className="container mx-auto py-4 px-8">
-          <h1 className="uppercase text-xl">2700 Chess</h1>
-        </div>
-      </nav>
+      <Navbar />
       <main className="container mx-auto p-8">
         <div className="mb-8">
           <Stack spacing={2} alignItems="center" className="w-full">
@@ -114,21 +111,21 @@ const HomePage: NextPage = () => {
               <ToggleButton
                 value="classical"
                 key="classical"
-                selected={timeControl === "classical"}
+                selected={timeControl === 'classical'}
               >
                 <div className="px-4 md:px-8">Classical</div>
               </ToggleButton>
               <ToggleButton
                 value="rapid"
                 key="rapid"
-                selected={timeControl === "rapid"}
+                selected={timeControl === 'rapid'}
               >
                 <div className="px-4 md:px-8">Rapid</div>
               </ToggleButton>
               <ToggleButton
                 value="blitz"
                 key="blitz"
-                selected={timeControl === "blitz"}
+                selected={timeControl === 'blitz'}
               >
                 <div className="px-4 md:px-8">Blitz</div>
               </ToggleButton>

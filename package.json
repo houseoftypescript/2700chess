@@ -1,9 +1,9 @@
 {
-  "name": "2700chess",
+  "name": "chess",
   "version": "0.0.1",
-  "description": "2700 Chess",
+  "description": "Chess",
   "main": "index.js",
-  "repository": "git@github.com:houseofmystery/2700chess.git",
+  "repository": "git@github.com:houseofmystery/chess.git",
   "author": "hieudoanm <hieumdoan@gmail.com>",
   "license": "MIT",
   "private": true,
@@ -18,10 +18,13 @@
   "dependencies": {
     "@emotion/react": "11.10.5",
     "@emotion/styled": "11.10.5",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.11.0",
     "@mui/material": "5.11.5",
     "@next/font": "13.1.2",
     "axios": "1.2.3",
     "cheerio": "1.0.0-rc.12",
+    "html-to-image": "1.11.4",
     "next": "13.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0"
