@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { useCallback, useEffect, useState } from "react";
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { useCallback, useEffect, useState } from 'react';
 
 type UseAxios<T> = {
   loading: boolean;
@@ -9,7 +9,7 @@ type UseAxios<T> = {
 
 export const useAxios = <T>(
   url: string,
-  configs: AxiosRequestConfig = {}
+  configs: AxiosRequestConfig = { headers: {} } as AxiosRequestConfig
 ): UseAxios<T> & { refetch: () => void } => {
   const [state, setState] = useState<UseAxios<T>>({
     loading: false,
