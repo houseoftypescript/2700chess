@@ -1,8 +1,8 @@
 export type Ranking = {
-  rank: string;
+  id: string;
   name: string;
   country: string;
   rating: string;
 };
 
-export type TimeControl = "classical" | "rapid" | "blitz";
+export type TimeClass = 'classical' | 'rapid' | 'blitz';
