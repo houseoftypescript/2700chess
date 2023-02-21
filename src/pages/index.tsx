@@ -1,66 +1,68 @@
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
 import { Player } from '@prisma/client';
-import { NextPage } from 'next';
-import { useState } from 'react';
-import Navbar from '../components/Navbar';
-import useAxios from '../hooks/use-axios';
-import { TimeClass } from '../types';
+import { GetServerSidePropsResult, NextPage } from 'next';
+import { ChangeEvent, useState } from 'react';
+import log from '../libs/log';
+import { prismaClient } from '../libs/prisma';
 
-const RankingTable: React.FC = () => {
-  const [sortBy, setSortBy] = useState<string>('classical');
-  const url: string = `/api/players`;
-  const { loading, data, error } = useAxios<{ players: Player[] }>(url);
+type PlayersProps = {
+  players: Omit<Player, 'createdAt' | 'updatedAt'>[];
+};
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <h2 className="text-xl uppercase">Loading</h2>
-      </div>
-    );
-  }
+const COLUMNS = ['name', 'classical', 'rapid', 'blitz', 'average', 'country'];
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <h2 className="text-xl uppercase">Error</h2>
-      </div>
-    );
-  }
-
-  const sortedPlayers = (data?.players || []).sort((a: any, b: any) => {
-    if (sortBy === 'country' || sortBy === 'name') {
-      return a[sortBy] > b[sortBy] ? 1 : -1;
-    }
-    return a[sortBy] < b[sortBy] ? 1 : -1;
+const RankingTable: React.FC<PlayersProps & { query: string }> = ({
+  query = '',
+  players,
+}) => {
+  const [state, setState] = useState<{ sortBy: string }>({
+    sortBy: 'classical',
   });
 
-  const keys = ['name', 'classical', 'rapid', 'blitz', 'average', 'country'];
+  const sortedPlayers = players
+    .filter((player) => {
+      if (query === '') {
+        return true;
+      }
+      return (
+        player.name.toLowerCase().includes(query.toLowerCase()) ||
+        player.country.toLowerCase().includes(query.toLowerCase())
+      );
+    })
+    .sort((a: any, b: any) => {
+      if (state.sortBy === 'country' || state.sortBy === 'name') {
+        return a[state.sortBy] > b[state.sortBy] ? 1 : -1;
+      }
+      return a[state.sortBy] < b[state.sortBy] ? 1 : -1;
+    });
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 430 }}>
+    <Paper className="border">
+      <TableContainer>
         <Table stickyHeader sx={{ minWidth: 430 }} aria-label="2700chess">
           <TableHead className="uppercase">
             <TableRow>
               <TableCell align="center" scope="row" sx={{ width: '64px' }}>
                 Rank
               </TableCell>
-              {keys.map((key: string, index: number) => {
+              {COLUMNS.map((key: string, index: number) => {
                 return (
                   <TableCell key={key} align={index === 0 ? 'left' : 'right'}>
                     <span
                       className={`cursor-pointer uppercase ${
-                        sortBy === key ? 'underline' : ''
+                        state.sortBy === key
+                          ? 'bg-gray-900 text-white px-2 py-1 rounded'
+                          : ''
                       }`}
-                      onClick={() => setSortBy(key)}
+                      onClick={() => setState({ ...state, sortBy: key })}
                     >
                       {key}
                     </span>
@@ -81,7 +83,7 @@ const RankingTable: React.FC = () => {
                   <TableCell align="center" scope="row" sx={{ width: '64px' }}>
                     {index + 1}
                   </TableCell>
-                  {keys.map((key: string, index: number) => {
+                  {COLUMNS.map((key: string, index: number) => {
                     return (
                       <TableCell
                         key={key}
@@ -101,27 +103,75 @@ const RankingTable: React.FC = () => {
   );
 };
 
-const HomePage: NextPage = () => {
-  const [timeClass, setTimeClass] = useState<TimeClass>('classical');
-
-  const changeTimeClass = (
-    _event: React.MouseEvent<HTMLElement>,
-    newTimeClass: string
-  ) => {
-    console.log(newTimeClass);
-    setTimeClass(newTimeClass as TimeClass);
-  };
+const HomePage: NextPage<PlayersProps> = ({ players = [] }) => {
+  const [query, setQuery] = useState<string>('');
 
   return (
-    <>
-      <Navbar />
-      <main className="container mx-auto p-8">
-        <div className="border rounded shadow">
-          <RankingTable />
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <nav className="border-b">
+        <Container>
+          <div className="py-4">
+            <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xl">2700 Chess</h1>
+              <TextField
+                size="small"
+                placeholder="Query"
+                label="Query"
+                value={query}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setQuery(event.target.value)
+                }
+              />
+            </div>
+          </div>
+        </Container>
+      </nav>
+      <main className="grow">
+        <Container>
+          <div className="py-8">
+            <RankingTable query={query} players={players} />
+          </div>
+        </Container>
       </main>
-    </>
+      <footer className="border-t">
+        <Container>
+          <div className="py-4">
+            &copy; {new Date().getFullYear()} - 2700 CHESS
+          </div>
+        </Container>
+      </footer>
+    </div>
   );
+};
+
+export const getServerSideProps = async (): Promise<
+  GetServerSidePropsResult<PlayersProps>
+> => {
+  try {
+    const players = await prismaClient.player.findMany({
+      select: {
+        id: true,
+        name: true,
+        country: true,
+        classical: true,
+        rapid: true,
+        blitz: true,
+        average: true,
+      },
+      where: {
+        OR: [
+          { classical: { gte: 2700 } },
+          { rapid: { gte: 2700 } },
+          { blitz: { gte: 2700 } },
+        ],
+      },
+    });
+    log.info(players);
+    return { props: { players } };
+  } catch (error) {
+    log.error(error);
+    return { props: { players: [] } };
+  }
 };
 
 export default HomePage;
