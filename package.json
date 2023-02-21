@@ -14,6 +14,7 @@
   },
   "scripts": {
     "dev": "kill-port 3000 && next dev -p 3000",
+    "prebuild": "ts-node ./scripts/ts/export/players",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
