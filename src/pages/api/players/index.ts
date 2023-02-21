@@ -1,7 +1,5 @@
-import { Player, prisma } from '@prisma/client';
-import axios from 'axios';
+import { Player } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { TimeClass } from '../../../types';
 import { prismaClient } from '../../../libs/prisma';
 
 type Data = {
