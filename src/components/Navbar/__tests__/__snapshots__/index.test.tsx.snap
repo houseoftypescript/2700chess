@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Navbar to match snapshot 1`] = `
+<div>
+  <nav
+    class="border-b"
+  >
+    <div
+      class="MuiContainer-root MuiContainer-maxWidthLg css-1oqqzyl-MuiContainer-root"
+    >
+      <div
+        class="py-4"
+      >
+        <h1
+          class="uppercase text-xl"
+        >
+          2700 Chess
+        </h1>
+      </div>
+    </div>
+  </nav>
+</div>
+`;
