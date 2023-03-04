@@ -21,7 +21,9 @@ const getRankings = (html: string): Ranking[] => {
         if (index === 2) ranking.country = $(cell).text().trim() || '';
         if (index === 3) ranking.rating = $(cell).text().trim() || '0';
       });
-    rankings.push(ranking);
+    if (ranking.id !== '0') {
+      rankings.push(ranking);
+    }
   });
   return rankings;
 };

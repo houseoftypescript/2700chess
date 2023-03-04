@@ -1,4 +1,12 @@
 import { Player } from '@/@types';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import BoltIcon from '@mui/icons-material/Bolt';
+import FlagIcon from '@mui/icons-material/Flag';
+import FunctionsIcon from '@mui/icons-material/Functions';
+import GridViewIcon from '@mui/icons-material/GridView';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,18 +15,38 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
-import { ChangeEvent, useState } from 'react';
+import Link from 'next/link';
+import { ChangeEvent, ReactNode, useState } from 'react';
 
 type RankingTableProps = {
   players: Player[];
 };
 
-const COLUMNS = ['name', 'classical', 'rapid', 'blitz', 'average', 'country'];
+type Column = 'name' | 'classical' | 'rapid' | 'blitz' | 'average' | 'country';
+
+const COLUMNS: Column[] = [
+  'name',
+  'classical',
+  'rapid',
+  'blitz',
+  'average',
+  'country',
+];
+
+const icons: Record<Column, ReactNode> = {
+  name: <AccountCircleIcon fontSize="small" />,
+  classical: <GridViewIcon fontSize="small" />,
+  rapid: <AccessTimeIcon fontSize="small" />,
+  blitz: <BoltIcon fontSize="small" />,
+  average: <FunctionsIcon fontSize="small" />,
+  country: <FlagIcon fontSize="small" />,
+};
 
 export const RankingTable: React.FC<RankingTableProps> = ({ players }) => {
   const [query, setQuery] = useState<string>('');
-  const [state, setState] = useState<{ sortBy: string }>({
-    sortBy: 'classical',
+  const [sort, setSort] = useState<{ by: string; dir: number }>({
+    by: 'classical',
+    dir: 1,
   });
 
   const sortedPlayers = players
@@ -32,10 +60,10 @@ export const RankingTable: React.FC<RankingTableProps> = ({ players }) => {
       );
     })
     .sort((a: any, b: any) => {
-      if (state.sortBy === 'country' || state.sortBy === 'name') {
-        return a[state.sortBy] > b[state.sortBy] ? 1 : -1;
+      if (sort.by === 'country' || sort.by === 'name') {
+        return sort.dir * (a[sort.by] > b[sort.by] ? 1 : -1);
       }
-      return a[state.sortBy] < b[state.sortBy] ? 1 : -1;
+      return sort.dir * (a[sort.by] < b[sort.by] ? 1 : -1);
     });
 
   return (
@@ -58,20 +86,38 @@ export const RankingTable: React.FC<RankingTableProps> = ({ players }) => {
           <TableHead className="uppercase">
             <TableRow>
               <TableCell align="center" scope="row" sx={{ width: '64px' }}>
-                Rank
+                NO
               </TableCell>
-              {COLUMNS.map((key: string, index: number) => {
+              {COLUMNS.map((column: Column, index: number) => {
                 return (
-                  <TableCell key={key} align={index === 0 ? 'left' : 'right'}>
+                  <TableCell
+                    key={column}
+                    align={index === 0 ? 'left' : 'right'}
+                  >
                     <span
-                      className={`cursor-pointer uppercase ${
-                        state.sortBy === key
-                          ? 'bg-gray-900 text-white px-2 py-1 rounded'
-                          : ''
+                      className={`cursor-pointer uppercase inline-flex items-center gap-2 px-2 py-1 rounded ${
+                        sort.by === column
+                          ? 'bg-gray-900 text-white'
+                          : 'border border-gray-900'
                       }`}
-                      onClick={() => setState({ ...state, sortBy: key })}
+                      onClick={() =>
+                        setSort({
+                          by: column,
+                          dir: column === sort.by ? -1 * sort.dir : 1,
+                        })
+                      }
                     >
-                      {key}
+                      {<>{icons[column]}</> || <></>}
+                      {column}
+                      {column === sort.by ? (
+                        sort.dir === 1 ? (
+                          <ArrowDropDownIcon />
+                        ) : (
+                          <ArrowDropUpIcon />
+                        )
+                      ) : (
+                        <></>
+                      )}
                     </span>
                   </TableCell>
                 );
@@ -90,13 +136,23 @@ export const RankingTable: React.FC<RankingTableProps> = ({ players }) => {
                   <TableCell align="center" scope="row" sx={{ width: '64px' }}>
                     {index + 1}
                   </TableCell>
-                  {COLUMNS.map((key: string, index: number) => {
+                  {COLUMNS.map((column: Column, index: number) => {
                     return (
                       <TableCell
-                        key={key}
+                        key={column}
                         align={index === 0 ? 'left' : 'right'}
                       >
-                        {player[key]}
+                        {column === 'name' ? (
+                          <Link
+                            href={`https://ratings.fide.com/profile/${player.id}`}
+                            target="_blank"
+                            className="underline"
+                          >
+                            {player[column]}
+                          </Link>
+                        ) : (
+                          <>{player[column]}</>
+                        )}
                       </TableCell>
                     );
                   })}
