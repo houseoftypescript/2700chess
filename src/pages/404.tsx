@@ -1,12 +1,6 @@
+import NotFoundTemplate from '@/template/NotFoundTemplate';
 import { NextPage } from 'next';
 
-const NotFoundPage: NextPage = () => {
-  return (
-    <div className="flex flex-col gap-4 items-center justify-center h-screen">
-      <h1 className="text-9xl font-bold">404</h1>
-      <p className="text-4xl">Page Not Found</p>
-    </div>
-  );
-};
+const NotFoundPage: NextPage = () => <NotFoundTemplate />;
 
 export default NotFoundPage;

@@ -1,20 +1,13 @@
-import { Player, PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import { Element, load } from 'cheerio';
-import { Ranking, TimeClass } from '../../../src/types';
-
-const prismaClient = new PrismaClient();
+import { writeFileSync } from 'fs';
+import { Player, Ranking, TimeClass } from '../../src/@types';
 
 const getRankings = (html: string): Ranking[] => {
   const $ = load(html);
   const rankings: Ranking[] = [];
   $('table tr').each((_index: number, element: Element) => {
-    const ranking: Ranking = {
-      id: '0',
-      name: '',
-      country: '',
-      rating: '0',
-    };
+    const ranking: Ranking = { id: '0', name: '', country: '', rating: '0' };
     $(element)
       .children('td')
       .each((index: number, cell: Element) => {
@@ -69,27 +62,24 @@ const main = async () => {
           rapid: timeClass === 'rapid' ? parseInt(ranking.rating, 10) : 0,
           blitz: timeClass === 'blitz' ? parseInt(ranking.rating, 10) : 0,
           average: 0,
-          createdAt: new Date(Date.now()),
-          updatedAt: new Date(Date.now()),
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
         });
       }
     }
   }
-
-  await prismaClient.player.deleteMany();
-  for (const player of players) {
-    if (player.id === '0') {
-      continue;
-    }
-    player.average = Math.round(
-      (player.classical * 3 + player.rapid * 2 + player.blitz) / 6
-    );
-    await prismaClient.player.upsert({
-      create: player,
-      update: player,
-      where: { id: player.id },
-    });
-  }
+  writeFileSync(
+    './src/data/players.json',
+    JSON.stringify(
+      players.map((player: Player) => {
+        const { classical, rapid, blitz } = player;
+        const average = Math.round((classical * 3 + rapid * 2 + blitz) / 6);
+        return { ...player, average };
+      }),
+      null,
+      2
+    )
+  );
 };
 
 main().catch((error) => console.error(error));
